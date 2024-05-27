@@ -5,8 +5,7 @@ import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.rag.RetrievalAugmentor;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static dev.langchain4j.internal.Utils.copyIfNotNull;
 import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
@@ -19,11 +18,13 @@ public class Metadata {
     private final UserMessage userMessage;
     private final Object chatMemoryId;
     private final List<ChatMessage> chatMemory;
+    private final Map<?, ?> userData;
 
-    public Metadata(UserMessage userMessage, Object chatMemoryId, List<ChatMessage> chatMemory) {
+    public Metadata(UserMessage userMessage, Object chatMemoryId, List<ChatMessage> chatMemory, Map<?, ?> userData) {
         this.userMessage = ensureNotNull(userMessage, "userMessage");
         this.chatMemoryId = chatMemoryId;
         this.chatMemory = copyIfNotNull(chatMemory);
+        this.userData = userData;
     }
 
     /**
@@ -49,6 +50,10 @@ public class Metadata {
         return chatMemory;
     }
 
+    public Map<?, ?> userData() {
+        return userData;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -56,7 +61,8 @@ public class Metadata {
         Metadata that = (Metadata) o;
         return Objects.equals(this.userMessage, that.userMessage)
                 && Objects.equals(this.chatMemoryId, that.chatMemoryId)
-                && Objects.equals(this.chatMemory, that.chatMemory);
+                && Objects.equals(this.chatMemory, that.chatMemory)
+                && Objects.equals(this.userData, that.userData);
     }
 
     @Override
@@ -70,10 +76,16 @@ public class Metadata {
                 " userMessage = " + userMessage +
                 ", chatMemoryId = " + chatMemoryId +
                 ", chatMemory = " + chatMemory +
+                ", userData = " + userData +
                 " }";
     }
 
     public static Metadata from(UserMessage userMessage, Object chatMemoryId, List<ChatMessage> chatMemory) {
-        return new Metadata(userMessage, chatMemoryId, chatMemory);
+        return from(userMessage, chatMemoryId, chatMemory, Collections.emptyMap());
+    }
+
+    public static Metadata from(UserMessage userMessage, Object chatMemoryId, List<ChatMessage> chatMemory, Map<?, ?> userData) {
+        userData = userData == null ? Collections.emptyMap() : userData;
+        return new Metadata(userMessage, chatMemoryId, chatMemory, userData);
     }
 }

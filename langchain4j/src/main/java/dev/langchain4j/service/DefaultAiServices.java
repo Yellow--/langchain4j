@@ -48,11 +48,12 @@ class DefaultAiServices<T> extends AiServices<T> {
             V v = parameter.getAnnotation(V.class);
             dev.langchain4j.service.UserMessage userMessage = parameter.getAnnotation(dev.langchain4j.service.UserMessage.class);
             MemoryId memoryId = parameter.getAnnotation(MemoryId.class);
+            UserData userData = parameter.getAnnotation(UserData.class);
             UserName userName = parameter.getAnnotation(UserName.class);
-            if (v == null && userMessage == null && memoryId == null && userName == null) {
+            if (v == null && userMessage == null && memoryId == null && userData == null && userName == null) {
                 throw illegalConfiguration(
                         "Parameter '%s' of method '%s' should be annotated with @V or @UserMessage " +
-                                "or @UserName or @MemoryId", parameter.getName(), method.getName()
+                                "or @UserName or @MemoryId or @UserData", parameter.getName(), method.getName()
                 );
             }
         }
@@ -90,6 +91,7 @@ class DefaultAiServices<T> extends AiServices<T> {
                         validateParameters(method);
 
                         Object memoryId = findMemoryId(method, args).orElse(DEFAULT);
+                        Map<?, ?> userData = findUserData(method,args);
 
                         Optional<SystemMessage> systemMessage = prepareSystemMessage(memoryId, method, args);
                         UserMessage userMessage = prepareUserMessage(method, args);
@@ -98,7 +100,7 @@ class DefaultAiServices<T> extends AiServices<T> {
                             List<ChatMessage> chatMemory = context.hasChatMemory()
                                     ? context.chatMemory(memoryId).messages()
                                     : null;
-                            Metadata metadata = Metadata.from(userMessage, memoryId, chatMemory);
+                            Metadata metadata = Metadata.from(userMessage, memoryId, chatMemory, userData);
                             AugmentationRequest augmentationRequest = new AugmentationRequest(userMessage, metadata);
                             augmentationResult = context.retrievalAugmentor.augment(augmentationRequest);
                             userMessage = (UserMessage) augmentationResult.chatMessage();
@@ -170,7 +172,7 @@ class DefaultAiServices<T> extends AiServices<T> {
 
                             for (ToolExecutionRequest toolExecutionRequest : aiMessage.toolExecutionRequests()) {
                                 ToolExecutor toolExecutor = context.toolExecutors.get(toolExecutionRequest.name());
-                                String toolExecutionResult = toolExecutor.execute(toolExecutionRequest, memoryId);
+                                String toolExecutionResult = toolExecutor.execute(toolExecutionRequest, memoryId, userData);
                                 ToolExecutionResultMessage toolExecutionResultMessage = ToolExecutionResultMessage.from(
                                         toolExecutionRequest,
                                         toolExecutionResult
@@ -394,6 +396,23 @@ class DefaultAiServices<T> extends AiServices<T> {
             }
         }
         return Optional.empty();
+    }
+
+    private static Map<?, ?> findUserData(Method method, Object[] args) {
+        Parameter[] parameters = method.getParameters();
+        for (int i = 0; i < parameters.length; i++) {
+            if (parameters[i].isAnnotationPresent(UserData.class)) {
+                Object candidate = args[i];
+                if (candidate != null && !(candidate instanceof Map)) {
+                    throw illegalArgument(
+                            "The value of parameter '%s' annotated with @MemoryId in method '%s' must not be null",
+                            parameters[i].getName(), method.getName()
+                    );
+                }
+                return candidate == null ? Collections.emptyMap() : (Map<?, ?>)candidate;
+            }
+        }
+        return Collections.emptyMap();
     }
 
     private static String toString(Object arg) {

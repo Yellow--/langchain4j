@@ -67,6 +67,9 @@ public class ToolSpecifications {
             if (parameter.isAnnotationPresent(ToolMemoryId.class)) {
                 continue;
             }
+            if (parameter.isAnnotationPresent(ToolUserData.class)) {
+                continue;
+            }
             builder.addParameter(parameter.getName(), toJsonSchemaProperties(parameter));
         }
 

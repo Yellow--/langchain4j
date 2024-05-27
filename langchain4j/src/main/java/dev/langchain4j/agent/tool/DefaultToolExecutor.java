@@ -26,13 +26,13 @@ public class DefaultToolExecutor implements ToolExecutor {
         this.method = Objects.requireNonNull(method, "method");
     }
 
-    public String execute(ToolExecutionRequest toolExecutionRequest, Object memoryId) {
+    public String execute(ToolExecutionRequest toolExecutionRequest, Object memoryId, Map<?, ?> userData) {
         log.debug("About to execute {} for memoryId {}", toolExecutionRequest, memoryId);
 
         // TODO ensure this method never throws exceptions
 
         Object[] arguments = prepareArguments(
-                method, argumentsAsMap(toolExecutionRequest.arguments()), memoryId);
+                method, argumentsAsMap(toolExecutionRequest.arguments()), memoryId, userData);
         try {
             String result = execute(arguments);
             log.debug("Tool execution result: {}", result);
@@ -73,7 +73,8 @@ public class DefaultToolExecutor implements ToolExecutor {
     static Object[] prepareArguments(
             Method method,
             Map<String, Object> argumentsMap,
-            Object memoryId
+            Object memoryId,
+            Map<?, ?> userData
     ) {
         Parameter[] parameters = method.getParameters();
         Object[] arguments = new Object[parameters.length];
@@ -82,6 +83,11 @@ public class DefaultToolExecutor implements ToolExecutor {
 
             if (parameters[i].isAnnotationPresent(ToolMemoryId.class)) {
                 arguments[i] = memoryId;
+                continue;
+            }
+
+            if(parameters[i].isAnnotationPresent(ToolUserData.class)) {
+                arguments[i] = userData;
                 continue;
             }
 

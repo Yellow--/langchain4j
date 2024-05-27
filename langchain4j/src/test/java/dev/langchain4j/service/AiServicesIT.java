@@ -1,5 +1,6 @@
 package dev.langchain4j.service;
 
+import dev.langchain4j.agent.tool.ToolUserData;
 import dev.langchain4j.exception.IllegalConfigurationException;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
@@ -17,11 +18,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static dev.langchain4j.data.message.SystemMessage.systemMessage;
 import static dev.langchain4j.data.message.UserMessage.userMessage;
@@ -37,6 +42,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class AiServicesIT {
 
+    private static final Logger log = LoggerFactory.getLogger(AiServicesIT.class);
     @Spy
     ChatLanguageModel chatLanguageModel = OpenAiChatModel.builder()
             .baseUrl(System.getenv("OPENAI_BASE_URL"))
@@ -174,6 +180,26 @@ public class AiServicesIT {
         verify(chatLanguageModel).generate(singletonList(userMessage(
                 "Analyze sentiment of " + customerReview + "\n" +
                         "You must answer strictly in the following format: one of [POSITIVE, NEUTRAL, NEGATIVE]")));
+    }
+
+    public static class SendMailTools {
+        public void sendEmail(String content, @ToolUserData Map<String, Object> userData) {
+            String subject = (String) userData.getOrDefault("subject", "default subject");
+            log.info("send email with content: {} userData: {}", content, subject);
+        }
+    }
+
+    public interface ChatService {
+        @UserMessage("summary text ```{{text}}``` and send summary by email")
+        String summaryAndSendEmail(@V("text") String text, @UserData Map<String, Object> userData);
+    }
+
+    public static void main(String[] args) {
+        ChatService chatService = AiServices.builder(ChatService.class)
+                .tools(new SendMailTools())
+                .build();
+        Map<String, Object> userData = Collections.singletonMap("subject", "customizeSubject");
+        chatService.summaryAndSendEmail("a very long text", userData);
     }
 
 
