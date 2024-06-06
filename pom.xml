@@ -13,7 +13,7 @@
     <properties>
         <gib.disable>true</gib.disable>
         <gib.buildDownstream>false</gib.buildDownstream>
-        <gib.referenceBrach>refs/remotes/origin/main</gib.referenceBrach>
+        <gib.referenceBranch>refs/remotes/origin/main</gib.referenceBranch>
     </properties>
 
     <modules>
