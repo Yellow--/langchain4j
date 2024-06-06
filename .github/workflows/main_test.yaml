@@ -3,10 +3,10 @@ name: Java CI
 on:
   push:
     branches:
-      - main
+      - test_workflow
   pull_request:
     branches:
-      - main
+      - test_workflow
 
 jobs:
   java_build:
