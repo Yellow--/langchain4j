@@ -27,7 +27,7 @@ jobs:
           elif [[ "${{ github.event_name }}" == 'pull_request' ]]; then
             gib_args+=' -Dgib.referenceBranch=${{ github.event.pull_request.base.ref }}'
           fi
-          echo "gib_args='${gib_args}'" > "${GITHUB_OUTPUT}"
+          echo "gib_args=${gib_args}" > "${GITHUB_OUTPUT}"
       - uses: actions/checkout@v4
       - name: Set up JDK ${{ matrix.java_version }}
         uses: actions/setup-java@v4
