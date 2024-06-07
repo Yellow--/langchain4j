@@ -18,6 +18,16 @@ jobs:
             included_modules: '-pl !code-execution-engines/langchain4j-code-execution-engine-graalvm-polyglot,!langchain4j-cassandra,!langchain4j-infinispan,!langchain4j-neo4j,!langchain4j-opensearch,!langchain4j-azure-ai-search'
     runs-on: ubuntu-latest
     steps:
+      - name: determine the gib args
+        id: gib_args_collector
+        run: |
+          gib_args='-Dgib.disable=false -Dgib.buildDownstream=false -Dgib.fetchReferenceBranch=true'
+          if [[ '${{ github.event_name }}' == 'push' ]]; then
+            gib_args+=' -Dgib.referenceBranch=${{ github.event.bash_ref }}'
+          elif [[ "${{ github.event_name }}" == 'pull_request' ]]; then
+            gib_args+=' -Dgib.referenceBranch=${{ github.event.pull_request.base.ref }}'
+          fi
+          echo "gib_args='${gib_args}'" > "${GITHUB_OUTPUT}"
       - uses: actions/checkout@v4
       - name: Set up JDK ${{ matrix.java_version }}
         uses: actions/setup-java@v4
@@ -26,7 +36,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Build with JDK ${{ matrix.java_version }}
-        run: mvn --batch-mode install -Dgib.disable=false -DskipITs ${{ matrix.included_modules }}
+        run: mvn --batch-mode install -DskipITs ${{ steps.gib_args_collector.outputs.gib_args }} ${{ matrix.included_modules }}
 
   # For checking some compliance things (require a recent JDK due to plugins so in a separate step)
   compliance:
