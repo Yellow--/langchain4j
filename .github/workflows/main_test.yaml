@@ -18,11 +18,11 @@ jobs:
             included_modules: '-pl !code-execution-engines/langchain4j-code-execution-engine-graalvm-polyglot,!langchain4j-cassandra,!langchain4j-infinispan,!langchain4j-neo4j,!langchain4j-opensearch,!langchain4j-azure-ai-search'
     runs-on: ubuntu-latest
     steps:
-      - name: determine the gib args
+      - name: Determine the gib args
         id: gib_args_collector
         run: |
           gib_args='-Dgib.disable=false -Dgib.buildDownstream=false -Dgib.fetchReferenceBranch=true'
-          echo '${{ github.event }}'
+          echo '${{ toJson(github.event) }}'
           if [[ '${{ github.event_name }}' == 'push' ]]; then
             gib_args+=' -Dgib.referenceBranch=${{ github.event.bash_ref }}'
           elif [[ "${{ github.event_name }}" == 'pull_request' ]]; then
