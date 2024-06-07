@@ -14,6 +14,7 @@
         <gib.disable>true</gib.disable>
         <gib.buildDownstream>false</gib.buildDownstream>
         <gib.referenceBranch>refs/remotes/origin/test_workflow</gib.referenceBranch>
+        <gib.fetchReferenceBranch>true</gib.fetchReferenceBranch>
     </properties>
 
     <modules>
