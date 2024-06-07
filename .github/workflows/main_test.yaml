@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - id: Create branch from commit by event name
+      - name: Create branch from commit by event name
         run: |
           if [[ '${{ github.event_name }}' == 'push' ]]; then
             git branch __branch_before ${{ github.event.before }}
