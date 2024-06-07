@@ -22,6 +22,7 @@ jobs:
         id: gib_args_collector
         run: |
           gib_args='-Dgib.disable=false -Dgib.buildDownstream=false -Dgib.fetchReferenceBranch=true'
+          echo '${{ github.event }}'
           if [[ '${{ github.event_name }}' == 'push' ]]; then
             gib_args+=' -Dgib.referenceBranch=${{ github.event.bash_ref }}'
           elif [[ "${{ github.event_name }}" == 'pull_request' ]]; then
