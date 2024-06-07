@@ -22,11 +22,11 @@ jobs:
         id: gib_args_collector
         run: |
           echo 'github_event: ${{ toJson(github.event) }}'
-          gib_args='-Dgib.disable=false -Dgib.buildDownstream=false -Dgib.fetchReferenceBranch=true'
+          gib_args='-Dgib.disable=false -Dgib.buildDownstream=false -Dgib.fetchReferenceBranch=false'
           if [[ '${{ github.event_name }}' == 'push' ]]; then
-            gib_args+=' -Dgib.referenceBranch=refs/remotes/origin/${{ github.event.before }}'
+            gib_args+=' -Dgib.referenceBranch=${{ github.event.before }}'
           elif [[ "${{ github.event_name }}" == 'pull_request' ]]; then
-            gib_args+=' -Dgib.referenceBranch=${{ github.event.pull_request.base.ref }}'
+            gib_args+=' -Dgib.referenceBranch=${{ github.event.pull_request.base.sha }}'
           fi
           echo "gib_args=${gib_args}" > "${GITHUB_OUTPUT}"
       - uses: actions/checkout@v4
