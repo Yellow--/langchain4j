@@ -20,6 +20,7 @@ public enum QianfanChatModelNameEnum {
     LLAMA_2_70B_CHAT("Llama-2-70b-chat", "llama_2_70b"),
     QIANFAN_CHINESE_LLAMA_2_7B("Qianfan-Chinese-Llama-2-7B", "qianfan_chinese_llama_2_7b"),
     CHATGLM2_6B_32K("ChatGLM2-6B-32K", "chatglm2_6b_32k"),
+
     AQUILACHAT_7B("AquilaChat-7B", "aquilachat_7b")
     ;
 
